@@ -12,7 +12,6 @@ jobs:
       - name: Set version and create tag
         uses: codfish/semantic-release-action@v3
         with:
-#          dry-run: true
           tag-format: 'v${version}'
           branches: |
             [ 'feature/containerize', 'master' ]
