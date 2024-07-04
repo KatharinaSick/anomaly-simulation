@@ -34,6 +34,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata (tags, labels) for Docker
+        if: steps.semantic-release.outputs.new-release-published == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # Set version tag based on semantic release output
+            type=semver,pattern=v{{version}},value=${{ steps.semantic-release.outputs.release-version }}
+            # Set latest tag
+            type=raw,value=latest
+
       - name: Build and push Docker image
         if: steps.semantic-release.outputs.new-release-published == 'true'
         id: push
@@ -41,4 +53,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.IMAGE_NAME }}:v${{ steps.semantic-release.outputs.release-version }},${{ env.IMAGE_NAME }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
